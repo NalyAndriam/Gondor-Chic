@@ -1,24 +1,36 @@
 import React, { useState } from "react";
 import "./RegisterPage.css";
 import "./Style.css";
-
 import { useNavigate, Link } from "react-router-dom";
-
-
+import axios from "axios";
 
 export default function RegisterPage() {
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    console.log({
-      pseudo,
-      email,
-      password,
-    });
+    try {
+      const { data } = await axios.post("http://localhost:8080/api/auth/register", {
+        username: pseudo,
+        email,
+        password,
+      });
+
+      console.log("Inscription OK:", data);
+      localStorage.setItem("token", data.data.token);
+
+      navigate("/home");
+
+    } catch (err) {
+      console.error("Erreur:", err.response?.data);
+      setError(err.response?.data?.message || "Erreur lors de l'inscription.");
+    }
   };
 
   return (
@@ -30,14 +42,14 @@ export default function RegisterPage() {
 
           <div className="brand">
             <h2 className="gc-title">
-                <div>
-                    <span className="gc-title-gondor">G</span>ondor{" "}
-                    <span className="gc-title-of">or</span>{" "}
-                </div>
-                <span className="gc-title-chic">Chic</span>
+              <div>
+                <span className="gc-title-gondor">G</span>ondor{" "}
+                <span className="gc-title-of">or</span>{" "}
+              </div>
+              <span className="gc-title-chic">Chic</span>
             </h2>
-                <p className="gc-subtitle">« La Forge de la Montagne »</p>
-                <div className="gc-divider" />
+            <p className="gc-subtitle">« La Forge de la Montagne »</p>
+            <div className="gc-divider" />
           </div>
 
           <div className="form-wrapper">
@@ -77,9 +89,9 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <button type="submit">
-                Créer un compte
-              </button>
+              {error && <p className="gc-error">{error}</p>}
+
+              <button type="submit">Créer un compte</button>
             </form>
 
             <p className="login-link">
@@ -105,7 +117,6 @@ export default function RegisterPage() {
 
             <div className="preview-card">
               <div className="preview-header" />
-
               <div className="preview-grid">
                 <div />
                 <div />
